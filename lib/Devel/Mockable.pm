@@ -1,6 +1,7 @@
 package Devel::Mockable;
 
-use our::way;
+use strict;
+use warnings;
 no strict 'refs';
 
 our %mocks;
