@@ -1,0 +1,10 @@
+CHANGELOG
+lib/Class/Mock/Generic/InterfaceTester.pm
+lib/Class/Mockable.pm
+Makefile.PL
+README
+t/class-mockable.t
+t/lib/SomePackage.pm
+t/pod-coverage.t
+t/pod.t
+MANIFEST
