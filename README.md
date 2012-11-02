@@ -1,4 +1,4 @@
-perl-Devel-Mockable
+perl-Class-Mockable
 ===================
 
 Modules for making your code's interfaces easily mockable, and for

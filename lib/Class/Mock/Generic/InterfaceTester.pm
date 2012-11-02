@@ -1,4 +1,4 @@
-package Devel::Mock::Generic::InterfaceTester;
+package Class::Mock::Generic::InterfaceTester;
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ local $Data::Dumper::Indent = 1;
 
 =head1 NAME
 
-Devel::Mock::Generic::InterfaceTester
+Class::Mock::Generic::InterfaceTester
 
 =head1 DESCRIPTION
 
@@ -25,13 +25,13 @@ In the code under test:
 
     package My::Module;
 
-    use Devel::Mockable
+    use Class::Mockable
         _storage_class => 'MyApp::Storage';
 
 and in the tests:
 
     My::Module->_storage_class(
-        Devel::Mock::Generic::InterfaceTester->new([
+        Class::Mock::Generic::InterfaceTester->new([
 	    {
 	        method => 'fetch',
 		input  => [customer_id => 94],
@@ -138,7 +138,7 @@ the log() method thus:
 
     package MyApp::SomeModule;
 
-    use Devel::Mockable
+    use Class::Mockable
         _logger => 'MyApp::Logger';
 
     sub log {
@@ -151,7 +151,7 @@ the log() method thus:
 and in the tests ...
 
     MyApp::SomeModule->_logger(
-        Devel::Mock::Generic::InterfaceTester->new([
+        Class::Mock::Generic::InterfaceTester->new([
 	    {
 	        method => 'log',
 		input  => [INFO, "fruit changed to apple"],
@@ -185,9 +185,9 @@ third-party systems - for example, for making a wee pretendy third
 party web service that the code you're testing wants to talk to.  You want
 to mock such things if the third party service is slow, or unreliable, or
 not available in all your testing environments.  You could also use 
-Devel::Mock::Generic::InterfaceTester for this, but often Test::MockObject
+Class::Mock::Generic::InterfaceTester for this, but often Test::MockObject
 is simpler.  Use Test::MockObject if you care mostly about the data you get
-back from external code, use Devel::Mock::Generic::InterfaceTester if you
+back from external code, use Class::Mock::Generic::InterfaceTester if you
 care more about how you call external code.
 
 =cut

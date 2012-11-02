@@ -1,4 +1,4 @@
-package Devel::Mockable;
+package Class::Mockable;
 
 use strict;
 use warnings;
@@ -30,7 +30,7 @@ sub import {
 
 =head1 NAME
 
-Devel::Mockable
+Class::Mockable
 
 =head1 DESCRIPTION
 
@@ -42,7 +42,7 @@ your code in isolation, and without relying on third-party services.
 
 =head1 SYNOPSIS
 
-    use Devel::Mockable
+    use Class::Mockable
         _email_sender         => 'Email::Sender::Simple',
         _email_sent_storage   => 'MyApp::Storage::EmailSent';
 
