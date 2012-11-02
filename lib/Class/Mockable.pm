@@ -4,6 +4,8 @@ use strict;
 use warnings;
 no strict 'refs';
 
+our $VERSION = '1.0';
+
 our %mocks;
 
 sub import {

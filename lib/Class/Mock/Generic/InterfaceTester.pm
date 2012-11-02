@@ -3,6 +3,8 @@ package Class::Mock::Generic::InterfaceTester;
 use strict;
 use warnings;
 
+our $VERSION = '1.0';
+
 use vars qw($AUTOLOAD);
 
 use Test::More;
