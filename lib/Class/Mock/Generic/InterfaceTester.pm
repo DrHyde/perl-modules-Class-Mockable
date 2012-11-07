@@ -289,7 +289,7 @@ sub DESTROY {
         sprintf (
             "didn't run all tests in mock object defined in %s (remaing tests: %s)",
             $self->{called_from},
-            Data::Dump::dump( $self->{tests} ),
+            Dumper( $self->{tests} ),
         )
     );
   }

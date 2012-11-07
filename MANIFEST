@@ -8,3 +8,4 @@ t/lib/SomePackage.pm
 t/pod-coverage.t
 t/pod.t
 MANIFEST
+t/class-mock-generic-interfacetester.t
