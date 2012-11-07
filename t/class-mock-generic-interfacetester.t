@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 6;
+use Test::More tests => 8;
 use Class::Mock::Generic::InterfaceTester;
 
 # mock _ok in C::M::G::IT
@@ -15,6 +15,7 @@ run_out_of_tests();
 wrong_method();
 wrong_args_structure();
 wrong_args_subref();
+magic_for_new();
 
 # and un-mock for a sanity-check
 Class::Mock::Generic::InterfaceTester->_reset_ok();
@@ -81,4 +82,14 @@ sub wrong_args_subref {
     ]);
 
     $interface->foo('bar'); # should emit an ok(1, "wrong args to method ...");
+}
+
+sub magic_for_new {
+    my $interface = Class::Mock::Generic::InterfaceTester->new([
+        { method => 'new', input => ['foo'], output => 'foo' },
+        { method => 'new', input => ['foo'], output => 'foo' },
+    ]);
+
+    ok($interface->new('foo') eq 'foo', "\$mockobject->new() returns right data");
+    $interface->new('bar'); # should emit an ok(1, "wrong args to method ...");
 }
