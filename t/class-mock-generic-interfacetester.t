@@ -22,5 +22,6 @@ select(STDERR);
 $| = 1;
 close(OLD_STDERR);
 
-ok($result =~ /^not ok/, "normal 'ok' works") || diag($result);
+ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
+    || diag($result);
 diag("from now on we mock it");

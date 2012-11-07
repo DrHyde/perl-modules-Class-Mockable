@@ -7,11 +7,17 @@ our $VERSION = '1.0';
 
 use vars qw($AUTOLOAD);
 
-use Test::More;
+use Test::More ();
 use Data::Compare;
 use Scalar::Util;
 use Data::Dumper;
 local $Data::Dumper::Indent = 1;
+
+use Class::Mockable
+    _ok => sub {
+        warn("calling Test::More::ok with [",join(', ', @_)."]\n");
+        Test::More::ok($_[0], @_[1..$#_])
+    };
 
 =head1 NAME
 
@@ -34,18 +40,18 @@ and in the tests:
 
     My::Module->_storage_class(
         Class::Mock::Generic::InterfaceTester->new([
-	    {
-	        method => 'fetch',
-		input  => [customer_id => 94],
-		output => ...
-	    },
-	    {
-	        method => 'update',
-		input  => [status => 'fired', reason => 'non-payment'],
-		output => 1,
-	    },
-	    ...
-	]);
+            {
+                method => 'fetch',
+                input  => [customer_id => 94],
+                output => ...
+            },
+            {
+                method => 'update',
+                input  => [status => 'fired', reason => 'non-payment'],
+                output => 1,
+            },
+            ...
+        ]);
     );
 
 =head1 METHODS
@@ -69,8 +75,8 @@ then specify a code-ref thus:
 
     {
         method => 'update',
-	input  => sub { exists({@_}->{fruit}) && {@_}->{fruit} eq 'apple' },
-	output => 94
+        input  => sub { exists({@_}->{fruit}) && {@_}->{fruit} eq 'apple' },
+        output => 94
     }
 
 In this case, the actual parameters passed to the method will be passed to
@@ -102,8 +108,8 @@ method call makes.  For example, in this accessor:
 
     sub fruit {
         my $self = shift;
-	if(@_) { $self->{fruit} = shift; }
-	return $self->{fruit};
+        if(@_) { $self->{fruit} = shift; }
+        return $self->{fruit};
     }
 
 the inputs are the argument (if supplied), and the outputs are the return
@@ -117,11 +123,11 @@ Now consider a slightly more complex accessor:
 
     sub fruit {
         my $self = shift;
-	if(@_) {
-	    $self->{fruit} = shift;
-	    $self->log(INFO, "fruit changed to ".$self->{fruit});
-	}
-	return $self->{fruit};
+        if(@_) {
+            $self->{fruit} = shift;
+            $self->log(INFO, "fruit changed to ".$self->{fruit});
+        }
+        return $self->{fruit};
     }
 
     sub log {
@@ -154,12 +160,12 @@ and in the tests ...
 
     MyApp::SomeModule->_logger(
         Class::Mock::Generic::InterfaceTester->new([
-	    {
-	        method => 'log',
-		input  => [INFO, "fruit changed to apple"],
-		output => "doesn't matter for this test"
-	    }
-	])
+            {
+                method => 'log',
+                input  => [INFO, "fruit changed to apple"],
+                output => "doesn't matter for this test"
+            }
+        ])
     );
 
     ...
@@ -208,14 +214,14 @@ sub new {
     return bless({
         called_from => $caller,
         tests => shift,
-	_origin_message => sub {
+        _origin_message => sub {
             my ($self, $method) = @_;
             return sprintf(
                 "method '%s' called on mock object defined in %s",
                 $method,
                 $caller
-	    )
-	}
+            )
+        }
     }, $class);
 }
 
@@ -228,7 +234,7 @@ sub AUTOLOAD {
     # times than expected - the code under test obviously has more outputs
     # than expected, which is Bad.
     if(!@{$self->{tests}}) {
-        ok(0, sprintf (
+        __PACKAGE__->_ok()->(0, sprintf (
             "run out of tests on mock object defined in %s",
             $self->{called_from}
         ));
@@ -241,7 +247,7 @@ sub AUTOLOAD {
     # under test's outputs are not what we expected (they are, at best
     # in the wrong order), which is Bad.
     if($next_test->{method} ne $method) {
-        ok( 0,
+        __PACKAGE__->_ok()->( 0,
             sprintf (
                 "wrong method (expected %s) %s",
                 $next_test->{method},
@@ -259,22 +265,22 @@ sub AUTOLOAD {
     # with value 'apple') then pass in a code-ref.
     if (ref $next_test->{input} eq 'CODE') {
         # pass the args to the code, see if it says they're ok
-	if(!$next_test->{input}->(@args)) {
-            ok(0,
+        if(!$next_test->{input}->(@args)) {
+            __PACKAGE__->_ok()->(0,
                 sprintf (
                     "wrong args to method %s. Got %s.",
                     $next_test->{method},
-		    Dumper(\@args)
+                    Dumper(\@args)
                 )
-	    );
-	}
+            );
+        }
     } elsif (!Compare(\@args, $next_test->{input})) {
-        ok( 0,
+        __PACKAGE__->_ok()->( 0,
             sprintf (
                 "wrong args to %s (expected %s, got %s)",
                 $self->{_origin_message}->($method),
-	        Dumper($next_test->{input}),
-	        Dumper(\@args)
+                Dumper($next_test->{input}),
+                Dumper(\@args)
             )
         );
         return;
@@ -285,7 +291,7 @@ sub AUTOLOAD {
 sub DESTROY {
   my $self = shift;
   if(@{$self->{tests}}) {
-    ok( 0,
+    __PACKAGE__->_ok()->( 0,
         sprintf (
             "didn't run all tests in mock object defined in %s (remaing tests: %s)",
             $self->{called_from},
