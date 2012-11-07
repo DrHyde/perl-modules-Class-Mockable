@@ -207,12 +207,12 @@ sub new {
         return $class->AUTOLOAD(@_);
     }
 
-    my $caller = (caller(1))[3];
+    my $caller = join('::', (caller(1))[0,3]);
     return bless({
         called_from => $caller,
         tests => shift,
         _origin_message => sub {
-            my ($self, $method) = @_;
+            my $method = shift;
             return sprintf(
                 "method '%s' called on mock object defined in %s",
                 $method,
