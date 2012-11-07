@@ -34,8 +34,9 @@ sub default_ok {
         '
     );
     open(STDERR, '>&', \*OLD_STDERR) || die("Can't restore STDERR\n");
-    select(STDERR);
+    my $current_fh = select(STDERR);
     $| = 1;
+    select($current_fh);
     close(OLD_STDERR);
     ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
         || diag($result);
