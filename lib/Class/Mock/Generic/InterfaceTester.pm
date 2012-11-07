@@ -14,10 +14,7 @@ use Data::Dumper;
 local $Data::Dumper::Indent = 1;
 
 use Class::Mockable
-    _ok => sub {
-        warn("calling Test::More::ok with [",join(', ', @_)."]\n");
-        Test::More::ok($_[0], @_[1..$#_])
-    };
+    _ok => sub { Test::More::ok($_[0], @_[1..$#_]) };
 
 =head1 NAME
 
