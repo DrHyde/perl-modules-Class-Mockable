@@ -207,7 +207,7 @@ sub new {
         return $class->AUTOLOAD(@_);
     }
 
-    my $caller = join('::', (caller(1))[0,3]);
+    my $caller = (caller(1))[3];
     return bless({
         called_from => $caller,
         tests => shift,
