@@ -17,8 +17,6 @@ wrong_args_structure();
 wrong_args_subref();
 magic_for_new();
 
-# and un-mock for a sanity-check
-Class::Mock::Generic::InterfaceTester->_reset_ok();
 default_ok();
 
 sub default_ok {
