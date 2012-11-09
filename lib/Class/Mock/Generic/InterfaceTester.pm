@@ -57,7 +57,10 @@ and in the tests:
 
 This is the only real method.  It creates a very simple object.  Pass
 to it an arrayref of fixtures structured as above.  Any subsequent
-method calls on that object are handled by AUTOLOAD.
+method calls on that object are handled by AUTOLOAD.  Note that because
+the constructor is Highly Magical you can even provide fixtures for a
+method called 'new()'.  The only ones you can't provide fixtures for are
+'AUTOLOAD()' and 'DESTROY()'.
 
 For each method call, the first element is removed from the array of
 fixtures.  We then compare the name of the method that was called with
@@ -297,5 +300,30 @@ sub DESTROY {
     );
   }
 }
+ 
+=head1 AUTHOR
+
+Copyright 2012 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+
+This software is free-as-in-speech software, and may be used, distributed,
+and modified under the terms of either the GNU General Public Licence
+version 2 or the Artistic Licence.  It's up to you which one you use.  The
+full text of the licences can be found in the files GPL2.txt and
+ARTISTIC.txt, respectively.
+
+=head1 SOURCE CODE REPOSITORY
+
+E<lt>git://github.com/DrHyde/perl-modules-Class-Mockable.gitE<gt>
+
+=head1 BUGS/FEEDBACK
+
+Please report bugs at Github
+E<lt>https://github.com/DrHyde/perl-modules-Class-Mockable/issuesE<gt>
+
+=head1 CONSPIRACY
+
+This software is also free-as-in-mason.
+
+=cut
 
 1;

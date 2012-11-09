@@ -9,3 +9,5 @@ t/pod-coverage.t
 t/pod.t
 MANIFEST
 t/class-mock-generic-interfacetester.t
+GPL2.txt
+ARTISTIC.txt
