@@ -10,5 +10,9 @@ WriteMakefile(
     },
   VERSION_FROM => 'lib/Class/Mockable.pm',
   PREREQ_PM    => {
+    'Data::Compare' => 0,
+    'Data::Dumper'  => 0,
+    'Scalar::Util'  => 0,
+    'Test::More'    => 0,
   },
 );
