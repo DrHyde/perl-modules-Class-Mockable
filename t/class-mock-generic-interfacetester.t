@@ -5,6 +5,7 @@ package CMGITtests;
 
 use Config;
 use Test::More tests => 8;
+use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
 # mock _ok in C::M::G::IT
@@ -21,22 +22,19 @@ default_ok();
 
 sub default_ok {
     my $perl = $Config{perlpath};
-    # what a lot of faff to portably (I hope) hide STDERR
-    open(OLD_STDERR, '>&', \*STDERR) || die("Can't dup STDERR\n");
-    close(STDERR);
-    $ENV{PERL5LIB} = join($Config{path_sep}, @INC);
-    my $result = qx(
-        $perl -MClass::Mock::Generic::InterfaceTester -e '
-        Class::Mock::Generic::InterfaceTester->new([
-            { method => 'wibble', input => ['wobble'], output => 'jelly' }
-        ])
-        '
-    );
-    open(STDERR, '>&', \*OLD_STDERR) || die("Can't restore STDERR\n");
-    my $current_fh = select(STDERR);
-    $| = 1;
-    select($current_fh);
-    close(OLD_STDERR);
+
+    my $result;
+    {
+      local $ENV{PERL5LIB} = join($Config{path_sep}, @INC);
+      $result = (capture {
+        system(
+            $perl, qw( -MClass::Mock::Generic::InterfaceTester -e ),
+	    " Class::Mock::Generic::InterfaceTester->new([
+                { method => 'wibble', input => ['wobble'], output => 'jelly' }
+              ]) "
+	)
+      })[0];
+    }
     ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
         || diag($result);
 }

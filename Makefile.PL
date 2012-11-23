@@ -14,5 +14,6 @@ WriteMakefile(
     'Data::Dumper'  => 0,
     'Scalar::Util'  => 0,
     'Test::More'    => 0,
+    'Capture::Tiny' => 0.21,
   },
 );
