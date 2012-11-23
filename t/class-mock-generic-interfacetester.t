@@ -29,10 +29,10 @@ sub default_ok {
       $result = (capture {
         system(
             $perl, qw( -MClass::Mock::Generic::InterfaceTester -e ),
-	    " Class::Mock::Generic::InterfaceTester->new([
+            " Class::Mock::Generic::InterfaceTester->new([
                 { method => 'wibble', input => ['wobble'], output => 'jelly' }
               ]) "
-	)
+        )
       })[0];
     }
     ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
