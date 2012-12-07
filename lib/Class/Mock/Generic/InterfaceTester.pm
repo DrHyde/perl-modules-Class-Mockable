@@ -293,7 +293,7 @@ sub DESTROY {
   if(@{$self->{tests}}) {
     __PACKAGE__->_ok()->( 0,
         sprintf (
-            "didn't run all tests in mock object defined in %s (remaing tests: %s)",
+            "didn't run all tests in mock object defined in %s (remaining tests: %s)",
             $self->{called_from},
             Dumper( $self->{tests} ),
         )
