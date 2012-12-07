@@ -11,3 +11,4 @@ MANIFEST
 t/class-mock-generic-interfacetester.t
 GPL2.txt
 ARTISTIC.txt
+t/coverage.sh

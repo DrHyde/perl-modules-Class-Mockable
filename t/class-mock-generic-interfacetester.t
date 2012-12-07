@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 8;
+use Test::More tests => 10;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -17,6 +17,7 @@ wrong_method();
 wrong_args_structure();
 wrong_args_subref();
 magic_for_new();
+didnt_run_all_tests();
 
 default_ok();
 
@@ -37,6 +38,14 @@ sub default_ok {
     }
     ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
         || diag($result);
+}
+
+sub didnt_run_all_tests {
+    { 
+        Class::Mock::Generic::InterfaceTester->new([
+            { method => 'foo', input => ['foo'], output => 'foo' },
+        ]);
+    }
 }
 
 sub correct_method_call_gets_correct_results {
@@ -74,9 +83,11 @@ sub wrong_args_structure {
 
 sub wrong_args_subref {
     my $interface = Class::Mock::Generic::InterfaceTester->new([
+        { method => 'foo', input => sub { shift() eq 'foo' }, output => 'bar' },
         { method => 'foo', input => sub { shift() eq 'foo' }, output => 'foo' },
     ]);
 
+    ok($interface->foo('foo') eq 'bar', "subref as input can pass");
     $interface->foo('bar'); # should emit an ok(1, "wrong args to method ...");
 }
 
