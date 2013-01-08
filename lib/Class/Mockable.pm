@@ -14,7 +14,17 @@ sub import {
 
     my $caller = (caller())[0];
 
+    mock:
     foreach my $mock (keys %args) {
+
+        # For the special mock key 'methods', add mockability to the class
+        # methods defined.
+        if (lc $mock eq 'methods') {
+            _add_method_mocking($caller, $args{$mock});
+            next mock;
+        }
+
+        # And add mocking for classes.
         my $singleton_name = "${caller}::$mock";
         $mocks{$singleton_name} = $args{$mock};
         *{"${caller}::_reset$mock"} = sub {
@@ -24,6 +34,35 @@ sub import {
             shift;
             if(exists($_[0])) { $mocks{$singleton_name} = shift; }
             $mocks{$singleton_name}
+        };
+    }
+}
+
+# Method mocking is slightly different, in that we need to create a setter, so
+# that the method can be replaced with a method mocker test interface or
+# code ref to do something else, as well as setting up the actual mock method
+# accessor to be used. Hurrah for Voodoo!!
+
+sub _add_method_mocking {
+    my $caller       = shift;
+    my $method_mocks = shift;
+
+    for my $mock (keys %$method_mocks) {
+        my $singleton_name = "${caller}::$mock";
+        $mocks{$singleton_name} = "${caller}::$method_mocks->{$mock}";
+
+        *{"${caller}::_reset$mock"} = sub {
+            $mocks{$singleton_name} = "${caller}::$method_mocks->{$mock}";
+        };
+
+        *{"${caller}::_set$mock"} = sub {
+            shift;
+            if (exists($_[0])) { $mocks{$singleton_name} = shift; }
+        };
+
+        *{"${caller}::$mock"} = sub {
+            shift;
+            $mocks{$singleton_name}->(@_);
         };
     }
 }
@@ -61,7 +100,7 @@ is equivalent to:
             if (exists($_[0])) { $email_sender = shift; }
             return $email_sender;
         }
-    
+
         my $email_sent_storage;
         _reset_email_sent_storage();
         sub _reset_email_sent_storage {
@@ -96,6 +135,68 @@ you want to do an end-to-end test before releasing - you would do this:
         "email sending stuff works (without mocking)");
 
 to restore the default functionality.
+
+
+=head2 METHOD MOCKING
+
+In order to isolate a method from others in the same class, you can also provide
+Class::Mockable with a list of class methods you'd like to be able to mock and
+it's accessor name.  This allows you to test each class method once without
+calling others during testing.
+
+    use Class::Mockable
+        methods => {
+            _foo => 'foo',
+        };
+
+Note, that the methods special key can be appended to the synopsis code example
+as it will work along side other object mocking.
+
+The above will create a _foo sub on your class that by default will call your
+classes foo() subroutine.  This behaviour can be changed by calling the setter
+function _set_foo (where _foo is your identifier).  The default behaviour can be
+restored by calling _reset_foo (again, where _foo is your identifier)
+
+For example:
+
+    package Test;
+
+    use strict;
+    use lib 'lib';
+    use Class::Mockable
+        methods => {
+            _bar => 'bar',
+        };
+
+    sub bar {
+        my $self = shift;
+        return "Bar";
+    }
+
+    sub foo {
+        my $self = shift;
+        return $self->_bar();
+    }
+
+    package main;
+
+    use strict;
+
+    TestStuff->_set_bar(
+        sub {
+            my $self = shift;
+            return "Foo";
+        }
+    );
+
+    print Test->bar();         # Prints "Bar"
+    print Test->foo();         # Prints "Foo"
+
+    TestStuff->_reset_bar();
+
+    print Test->bar();         # Prints "Bar"
+    print Test->foo();         # Prints "Bar"
+
 
 =head1 AUTHOR
 
