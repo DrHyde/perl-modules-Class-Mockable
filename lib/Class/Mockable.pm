@@ -14,14 +14,13 @@ sub import {
 
     my $caller = (caller())[0];
 
-    mock:
-    foreach my $mock (keys %args) {
+    MOCK: foreach my $mock (keys %args) {
 
-        # For the special mock key 'methods', add mockability to the class
+        # For the special mock key 'methods', add mockability to the
         # methods defined.
         if (lc $mock eq 'methods') {
             _add_method_mocking($caller, $args{$mock});
-            next mock;
+            next MOCK;
         }
 
         # And add mocking for classes.
@@ -47,22 +46,25 @@ sub _add_method_mocking {
     my $caller       = shift;
     my $method_mocks = shift;
 
-    for my $mock (keys %$method_mocks) {
-        my $singleton_name = "${caller}::$mock";
-        $mocks{$singleton_name} = "${caller}::$method_mocks->{$mock}";
+    for my $wrapper (keys %{$method_mocks}) {
+        my $singleton_name = "${caller}::$wrapper";
+        my $wrapped = $method_mocks->{$wrapper};
 
-        *{"${caller}::_reset$mock"} = sub {
-            $mocks{$singleton_name} = "${caller}::$method_mocks->{$mock}";
-        };
+        # I just invented the create-and-execute-subroutine operator :-)
+        &{*{"${caller}::_reset$wrapper"} = sub {
+            no warnings 'redefine';
+            *{"${caller}::$wrapper"} = sub {
+                my $invocant = shift;
+                $invocant->$wrapped(@_);
+            };
+        }};
 
-        *{"${caller}::_set$mock"} = sub {
-            shift;
-            if (exists($_[0])) { $mocks{$singleton_name} = shift; }
-        };
-
-        *{"${caller}::$mock"} = sub {
-            shift;
-            $mocks{$singleton_name}->(@_);
+        *{"${caller}::_set$wrapper"} = sub {
+            my $invocant = shift;
+            if (exists($_[0])) {
+                no warnings 'redefine';
+                *{"${caller}::$wrapper"} = shift;
+            }
         };
     }
 }
@@ -148,7 +150,7 @@ that you have defined.
         };
 
 The above will create a _foo sub on your class that by default will call your
-classes foo() subroutine.  This behaviour can be changed by calling the setter
+class's foo() subroutine.  This behaviour can be changed by calling the setter
 function _set_foo (where _foo is your identifier).  The default behaviour can be
 restored by calling _reset_foo (again, where _foo is your identifier).
 
@@ -180,13 +182,13 @@ For example:
         }
     );
 
-    print Test->bar();         # Prints "Bar"
-    print Test->foo();         # Prints "Foo"
+    print Some::Module->bar();         # Prints "Bar"
+    print Some::Module->foo();         # Prints "Foo"
 
-    TestStuff->_reset_bar();
+    Some::Module->_reset_bar();
 
-    print Test->bar();         # Prints "Bar"
-    print Test->foo();         # Prints "Bar"
+    print Some::Module->bar();         # Prints "Bar"
+    print Some::Module->foo();         # Prints "Bar"
 
 
 =head1 AUTHOR

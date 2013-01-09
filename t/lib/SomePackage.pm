@@ -1,9 +1,12 @@
 package SomePackage;
 
+use base ParentPackage;
+
 use Class::Mockable
     _returnvalue => 94,
     methods => {
-        _some_method => 'some_method',
+        _wrapped_method           => 'wrapped_method',
+        _wrapped_method_in_parent => 'wrapped_method_in_parent',
     };
 
 sub get_returnvalue {
@@ -11,9 +14,9 @@ sub get_returnvalue {
     return _returnvalue();
 }
 
-sub some_method {
+sub wrapped_method {
     my $class = shift;
-    return "some method";
+    return "wrapped method";
 }
 
 1;
