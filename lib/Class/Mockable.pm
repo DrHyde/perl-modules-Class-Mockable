@@ -190,6 +190,8 @@ For example:
     print Some::Module->bar();         # Prints "Bar"
     print Some::Module->foo();         # Prints "Bar"
 
+It will also work for inserting a shim into a subclass to wrap around a method
+inherited from a superclass.
 
 =head1 AUTHOR
 
