@@ -41,7 +41,7 @@ sub import {
 # Method mocking is slightly different, in that we need to create a setter, so
 # that the method can be replaced with a method mocker test interface or
 # code ref to do something else, as well as setting up the actual mock method
-# accessor to be used. Hurrah for Voodoo!!
+# accessor to be used.
 
 sub _add_method_mocking {
     my $caller       = shift;
@@ -139,30 +139,23 @@ to restore the default functionality.
 
 =head2 METHOD MOCKING
 
-In order to isolate a method from others in the same class, you can also provide
-Class::Mockable with a list of class methods you'd like to be able to mock and
-it's accessor name.  This allows you to test each class method once without
-calling others during testing.
+We also provide a way of easily inserting shims that wrap around methods
+that you have defined.
 
     use Class::Mockable
         methods => {
             _foo => 'foo',
         };
 
-Note, that the methods special key can be appended to the synopsis code example
-as it will work along side other object mocking.
-
 The above will create a _foo sub on your class that by default will call your
 classes foo() subroutine.  This behaviour can be changed by calling the setter
 function _set_foo (where _foo is your identifier).  The default behaviour can be
-restored by calling _reset_foo (again, where _foo is your identifier)
+restored by calling _reset_foo (again, where _foo is your identifier).
 
 For example:
 
-    package Test;
+    package Some::Module;
 
-    use strict;
-    use lib 'lib';
     use Class::Mockable
         methods => {
             _bar => 'bar',
@@ -180,9 +173,7 @@ For example:
 
     package main;
 
-    use strict;
-
-    TestStuff->_set_bar(
+    Some::Module->_set_bar(
         sub {
             my $self = shift;
             return "Foo";
@@ -200,7 +191,9 @@ For example:
 
 =head1 AUTHOR
 
-Copyright 2012 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2012-13 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+
+With some bits from James Ronan
 
 This software is free-as-in-speech software, and may be used, distributed,
 and modified under the terms of either the GNU General Public Licence
