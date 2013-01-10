@@ -13,3 +13,5 @@ GPL2.txt
 ARTISTIC.txt
 t/coverage.sh
 t/lib/ParentPackage.pm
+lib/Class/Mock/Method/InterfaceTester.pm
+t/class-mock-method-interfacetester.t
