@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 
+# very similar pre-amble to class-mock-generic-interfacetester.t
+# how about some Test::Class and inheritance?
+
 use Config;
 use Test::More tests => 10;
 use Capture::Tiny qw(capture);
