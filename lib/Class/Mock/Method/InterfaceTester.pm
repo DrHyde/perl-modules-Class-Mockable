@@ -43,3 +43,93 @@ sub DESTROY {
 }
 
 1;
+
+=head1 NAME
+
+Class::Mock::Method::InterfaceTester
+
+=head1 DESCRIPTION
+
+A helper for Class::Mockable's method mocking
+
+=head1 SYNOPSIS
+
+In the class under test:
+
+    # create a '_foo' wrapper around method 'foo'
+    use Class::Mockable
+        methods => { _foo => 'foo' };
+
+And then in the tests:
+
+    Some::Module->_set_foo(
+        Class::Mock::Method::InterfaceTester->new([
+            {
+                input  => ...
+                output => ...
+            }
+        ])
+    );
+
+=head1 METHODS
+
+=head2 new
+
+This is the constructor.  It returns a blessed sub-ref.  Class::Mockable's
+method mocking expects a sub-ref, so will Just Work (tm).
+
+The sub-ref will behave similarly to the method calls defined in
+Class::Mock::Generic::InterfaceTester.  That is, it will validate
+that the method is being called correctly and emit a test failure if it
+isn't, or if called correctly will return the specified value.  If the
+method is ever called with the wrong parameters - including if defined
+method calls are made in the wrong order, then that's a test failure.
+
+It is also a test failure to call the method fewer or more times than
+expected.
+
+C<new()> takes an arrayref or hashrefs as its argument.  Those hashes
+must have keys 'input' and 'output' whose values define the ins and
+outs of each method call in turn.  'input' is always an arrayref which
+will get compared to all the method's arguments (excluding the first
+one, the object or class itself) but For validating very complex inputs
+you may specify a subroutine reference for the input, which will get
+executed with the actual input as its argument.  If you want to check
+that the method is being invoked on the right object or class (if you
+are paranoid about inheritance, for example) then use the optional
+'invocant_class' string to check that it's being called as a class method
+on the right class, or invocant_object' string to check that it's being
+called on an object of the right class, or 'invocant_object' subref to
+check that it's being called on an object that, when passed to the sub-ref,
+returns true.
+
+=head1 SEE ALSO
+
+L<Class::Mockable>
+
+L<Class::Mock::Generic::InterfaceTester>
+
+=head1 AUTHOR
+
+Copyright 2013 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+
+This software is free-as-in-speech software, and may be used, distributed,
+and modified under the terms of either the GNU General Public Licence
+version 2 or the Artistic Licence.  It's up to you which one you use.  The
+full text of the licences can be found in the files GPL2.txt and
+ARTISTIC.txt, respectively.
+
+=head1 SOURCE CODE REPOSITORY
+
+E<lt>git://github.com/DrHyde/perl-modules-Class-Mockable.gitE<gt>
+
+=head1 BUGS/FEEDBACK
+
+Please report bugs at Github
+E<lt>https://github.com/DrHyde/perl-modules-Class-Mockable/issuesE<gt>
+
+=head1 CONSPIRACY
+
+This software is also free-as-in-mason.
+
+=cut
