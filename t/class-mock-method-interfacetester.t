@@ -43,6 +43,7 @@ sub default_ok {
 correct_method_call_gets_correct_results();
 run_out_of_tests();
 wrong_args_structure();
+wrong_args_subref();
 
 sub wrong_args_structure {
     __PACKAGE__->_reset_test_method();
@@ -52,6 +53,19 @@ sub wrong_args_structure {
         ])
     );
 
+    __PACKAGE__->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
+}
+
+sub wrong_args_subref {
+    __PACKAGE__->_reset_test_method();
+    __PACKAGE__->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { input => sub { $_[0] eq 'foo' } , output => 'foo' },
+            { input => sub { $_[0] eq 'foo' } , output => 'foo' },
+        ])
+    );
+
+    ok(__PACKAGE__->_test_method('foo') eq 'foo', "correct method call gets right result back (checking with a subref)");
     __PACKAGE__->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
 }
 

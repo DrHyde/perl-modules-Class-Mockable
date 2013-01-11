@@ -30,11 +30,16 @@ sub new {
         my $this_test = shift(@tests);
         my $invocant = shift;
         my @params = @_;
-        if(!Compare($this_test->{input}, \@params)) {
+        if(ref($this_test->{input}) eq 'CODE') {
+            if(!$this_test->{input}->(@params)) {
+                __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant in %s. Got %s.", $called_from, Dumper(\@params)));
+                return;
+            }
+        } elsif(!Compare($this_test->{input}, \@params)) {
             __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant in %s. Got %s.", $called_from, Dumper(\@params)));
-        } else {
-            return $this_test->{output};
+            return;
         }
+        return $this_test->{output};
     }, $class);
 }
 
