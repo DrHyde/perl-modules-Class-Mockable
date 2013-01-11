@@ -22,7 +22,12 @@ sub new {
     my @tests = @{shift()};
 
     return bless(sub {
-        @tests; $called_from;
+        if(!@tests) { # no tests left
+            __PACKAGE__->_ok()->(0, sprintf("run out of tests on mock method defined in %s", $called_from));
+            return;
+        }
+
+        my $this_test = shift(@tests);
     }, $class);
 }
 

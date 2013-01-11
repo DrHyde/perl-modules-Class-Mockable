@@ -15,5 +15,6 @@ WriteMakefile(
     'Scalar::Util'  => 0,
     'Test::More'    => 0,
     'Capture::Tiny' => 0.21,
+    'PadWalker'     => 1.0, # earlier versions don't have closed_over()
   },
 );
