@@ -14,7 +14,7 @@ use CMMITTestClass::Subclass;
 # how about some Test::Class and inheritance?
 
 use Config;
-use Test::More tests => 26;
+use Test::More;
 use Scalar::Util qw(blessed);
 use Capture::Tiny qw(capture);
 use Class::Mock::Method::InterfaceTester;
