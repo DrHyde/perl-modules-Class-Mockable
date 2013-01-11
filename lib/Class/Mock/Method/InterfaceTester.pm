@@ -28,6 +28,13 @@ sub new {
         }
 
         my $this_test = shift(@tests);
+        my $invocant = shift;
+        my @params = @_;
+        if(!Compare($this_test->{input}, \@params)) {
+            __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant in %s. Got %s.", $called_from, Dumper(\@params)));
+        } else {
+            return $this_test->{output};
+        }
     }, $class);
 }
 
@@ -36,10 +43,10 @@ sub DESTROY {
   my $self = shift;
   my %closure = %{(closed_over($self))[0]};
 
-  if($closure{'@tests'}) {
+  if(@{$closure{'@tests'}}) {
     __PACKAGE__->_ok()->( 0,
         sprintf (
-            "didn't run all tests in mock object defined in %s (remaining tests: %s)",
+            "didn't run all tests in mock method defined in %s (remaining tests: %s)",
             $closure{'$called_from'},
             Dumper( $closure{'@tests'} )
         )

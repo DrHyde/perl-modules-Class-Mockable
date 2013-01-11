@@ -40,7 +40,35 @@ sub default_ok {
         || diag($result);
 }
 
+correct_method_call_gets_correct_results();
 run_out_of_tests();
+wrong_args_structure();
+
+sub wrong_args_structure {
+    __PACKAGE__->_reset_test_method();
+    __PACKAGE__->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { input => ['foo'], output => 'foo' },
+        ])
+    );
+
+    __PACKAGE__->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
+}
+
+sub correct_method_call_gets_correct_results {
+    __PACKAGE__->_reset_test_method();
+    ok(__PACKAGE__->_test_method('foo') eq "called test_method on ".__PACKAGE__." with [foo]\n",
+        "calling a method after _reset()ing works"
+    );
+
+    __PACKAGE__->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { input => ['foo'], output => 'foo' },
+        ])
+    );
+
+    ok(__PACKAGE__->_test_method('foo') eq 'foo', "correct method call gets right result back");
+}
 
 sub run_out_of_tests {
     __PACKAGE__->_set_test_method(
