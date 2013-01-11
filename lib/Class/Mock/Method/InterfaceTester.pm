@@ -43,7 +43,9 @@ sub new {
         }
 
         # check invocant
-        if($this_test->{invocant_class}) { # must be called as class method on right class
+        if($this_test->{invocant_class} && $this_test->{invocant_object}) {
+            __PACKAGE__->_ok()->(0, sprintf("bad fixture %s, can't have invocant_object and invocant_class, defined in %s", Dumper($this_test), $called_from));
+        } elsif($this_test->{invocant_class}) { # must be called as class method on right class
             if(ref($invocant)) {
                 __PACKAGE__->_ok()->(0, sprintf("expected call as class method, but object method called, defined in %s.", $called_from));
                 return;
@@ -51,6 +53,7 @@ sub new {
                 __PACKAGE__->_ok()->(0, sprintf("class method called on wrong class, defined in %s - got %s expected %s.", $called_from, $invocant, $this_test->{invocant_class}));
                 return;
             }
+        } elsif($this_test->{invocant_object}) {
         }
 
         return $this_test->{output};

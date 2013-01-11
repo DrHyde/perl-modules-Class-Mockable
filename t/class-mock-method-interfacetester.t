@@ -13,7 +13,7 @@ use Class::Mockable
 # how about some Test::Class and inheritance?
 
 use Config;
-use Test::More tests => 11;
+use Test::More tests => 17;
 use Capture::Tiny qw(capture);
 use Class::Mock::Method::InterfaceTester;
 
@@ -49,6 +49,7 @@ wrong_args_structure();
 wrong_args_subref();
 didnt_run_all_tests();
 inheritance();
+invocant_class_and_object();
 invocant_class();
 
 sub wrong_args_structure {
@@ -119,6 +120,15 @@ sub inheritance {
         "yup, subclass is good (sanity check)");
     ok(CMMITTests::Subclass->_test_method('foo') eq 'foo', "called mock on subclass OK");
     CMMITTests::Subclass->_test_method('foo'); # should spit out a 'ran out of tests' error
+}
+
+sub invocant_class_and_object {
+    CMMITTests->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { invocant_class => 'CMMITTests', invocant_object => 'CMMITTests', input => ['foo'], output => 'foo' },
+        ])
+    );
+    CMMITTests->_test_method('foo'); # bad fixture
 }
 
 sub invocant_class {
