@@ -44,6 +44,7 @@ correct_method_call_gets_correct_results();
 run_out_of_tests();
 wrong_args_structure();
 wrong_args_subref();
+didnt_run_all_tests();
 
 sub wrong_args_structure {
     __PACKAGE__->_reset_test_method();
@@ -57,7 +58,6 @@ sub wrong_args_structure {
 }
 
 sub wrong_args_subref {
-    __PACKAGE__->_reset_test_method();
     __PACKAGE__->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => sub { $_[0] eq 'foo' } , output => 'foo' },
@@ -93,4 +93,13 @@ sub run_out_of_tests {
 
     __PACKAGE__->_test_method('foo'); # eat the first test
     __PACKAGE__->_test_method('bar'); # should emit an ok(1, "run out of tests ...")
+}
+
+sub didnt_run_all_tests {
+    __PACKAGE__->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { input => ['foo'], output => 'foo' },
+        ])
+    );
+    __PACKAGE__->_reset_test_method();
 }
