@@ -3,6 +3,9 @@ use warnings;
 
 package CMMITTests;
 
+use lib 't/lib';
+use CMMITTests::Subclass;
+
 use Class::Mockable
     methods => { _test_method => 'test_method' };
 
@@ -10,7 +13,7 @@ use Class::Mockable
 # how about some Test::Class and inheritance?
 
 use Config;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Capture::Tiny qw(capture);
 use Class::Mock::Method::InterfaceTester;
 
@@ -45,61 +48,94 @@ run_out_of_tests();
 wrong_args_structure();
 wrong_args_subref();
 didnt_run_all_tests();
+inheritance();
+invocant_class();
 
 sub wrong_args_structure {
-    __PACKAGE__->_reset_test_method();
-    __PACKAGE__->_set_test_method(
+    CMMITTests->_reset_test_method();
+    CMMITTests->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => ['foo'], output => 'foo' },
         ])
     );
 
-    __PACKAGE__->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
+    CMMITTests->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
 }
 
 sub wrong_args_subref {
-    __PACKAGE__->_set_test_method(
+    CMMITTests->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => sub { $_[0] eq 'foo' } , output => 'foo' },
             { input => sub { $_[0] eq 'foo' } , output => 'foo' },
         ])
     );
 
-    ok(__PACKAGE__->_test_method('foo') eq 'foo', "correct method call gets right result back (checking with a subref)");
-    __PACKAGE__->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
+    ok(CMMITTests->_test_method('foo') eq 'foo', "correct method call gets right result back (checking with a subref)");
+    CMMITTests->_test_method('bar'); # should emit an ok(1, "wrong args to method ...");
 }
 
 sub correct_method_call_gets_correct_results {
-    __PACKAGE__->_reset_test_method();
-    ok(__PACKAGE__->_test_method('foo') eq "called test_method on ".__PACKAGE__." with [foo]\n",
+    CMMITTests->_reset_test_method();
+    ok(CMMITTests->_test_method('foo') eq "called test_method on CMMITTests with [foo]\n",
         "calling a method after _reset()ing works"
     );
 
-    __PACKAGE__->_set_test_method(
+    CMMITTests->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => ['foo'], output => 'foo' },
         ])
     );
 
-    ok(__PACKAGE__->_test_method('foo') eq 'foo', "correct method call gets right result back");
+    ok(CMMITTests->_test_method('foo') eq 'foo', "correct method call gets right result back");
 }
 
 sub run_out_of_tests {
-    __PACKAGE__->_set_test_method(
+    CMMITTests->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => ['foo'], output => 'foo' },
         ])
     );
 
-    __PACKAGE__->_test_method('foo'); # eat the first test
-    __PACKAGE__->_test_method('bar'); # should emit an ok(1, "run out of tests ...")
+    CMMITTests->_test_method('foo'); # eat the first test
+    CMMITTests->_test_method('bar'); # should emit an ok(1, "run out of tests ...")
 }
 
 sub didnt_run_all_tests {
-    __PACKAGE__->_set_test_method(
+    CMMITTests->_set_test_method(
         Class::Mock::Method::InterfaceTester->new([
             { input => ['foo'], output => 'foo' },
         ])
     );
-    __PACKAGE__->_reset_test_method();
+    CMMITTests->_reset_test_method();
+}
+
+sub inheritance {
+    CMMITTests->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { input => ['foo'], output => 'foo' },
+        ])
+    );
+    ok(CMMITTests::Subclass->test_method('foo') eq "called test_method on CMMITTests::Subclass with [foo]\n",
+        "yup, subclass is good (sanity check)");
+    ok(CMMITTests::Subclass->_test_method('foo') eq 'foo', "called mock on subclass OK");
+    CMMITTests::Subclass->_test_method('foo'); # should spit out a 'ran out of tests' error
+}
+
+sub invocant_class {
+    CMMITTests->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { invocant_class => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_class => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_class => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_class => 'CMMITTests::Subclass', input => ['foo'], output => 'foo' },
+            { invocant_class => 'CMMITTests::Subclass', input => ['foo'], output => 'foo' },
+        ])
+    );
+
+    bless({}, 'CMMITTests')->_test_method('foo'); # called on object, not class
+
+    ok(CMMITTests->_test_method('foo') eq 'foo', "called on right class");
+    CMMITTests::Subclass->_test_method('foo'); # called on wrong class, via inheritance
+    CMMITTests->_test_method('foo');           # called on wrong class
+    ok(CMMITTests::Subclass->_test_method('foo') eq 'foo', "called on right class via inheritance");
 }

@@ -30,15 +30,29 @@ sub new {
         my $this_test = shift(@tests);
         my $invocant = shift;
         my @params = @_;
+
+        # check arguments
         if(ref($this_test->{input}) eq 'CODE') {
             if(!$this_test->{input}->(@params)) {
-                __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant in %s. Got %s.", $called_from, Dumper(\@params)));
+                __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant defined in %s. Got %s.", $called_from, Dumper(\@params)));
                 return;
             }
         } elsif(!Compare($this_test->{input}, \@params)) {
-            __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant in %s. Got %s.", $called_from, Dumper(\@params)));
+            __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant defined in %s. Got %s.", $called_from, Dumper(\@params)));
             return;
         }
+
+        # check invocant
+        if($this_test->{invocant_class}) { # must be called as class method on right class
+            if(ref($invocant)) {
+                __PACKAGE__->_ok()->(0, sprintf("expected call as class method, but object method called, defined in %s.", $called_from));
+                return;
+            } elsif($invocant ne $this_test->{invocant_class}) {
+                __PACKAGE__->_ok()->(0, sprintf("class method called on wrong class, defined in %s - got %s expected %s.", $called_from, $invocant, $this_test->{invocant_class}));
+                return;
+            }
+        }
+
         return $this_test->{output};
     }, $class);
 }
@@ -52,7 +66,7 @@ sub DESTROY {
     __PACKAGE__->_ok()->( 0,
         sprintf (
             "didn't run all tests in mock method defined in %s (remaining tests: %s)",
-            $closure{'$called_from'},
+            ${$closure{'$called_from'}},
             Dumper( $closure{'@tests'} )
         )
     );
@@ -115,8 +129,9 @@ executed with the actual input as its argument.  If you want to check
 that the method is being invoked on the right object or class (if you
 are paranoid about inheritance, for example) then use the optional
 'invocant_class' string to check that it's being called as a class method
-on the right class, or invocant_object' string to check that it's being
-called on an object of the right class, or 'invocant_object' subref to
+on the right class (not on a subclass, *the right class*), or
+invocant_object' string to check that it's being called on an object of
+the right class (again, not a subclass), or 'invocant_object' subref to
 check that it's being called on an object that, when passed to the sub-ref,
 returns true.
 
