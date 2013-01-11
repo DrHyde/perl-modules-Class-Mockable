@@ -11,14 +11,6 @@ use Class::Mock::Generic::InterfaceTester;
 # mock _ok in C::M::G::IT
 Class::Mock::Generic::InterfaceTester->_ok(sub { Test::More::ok(!shift(), shift()); });
 
-correct_method_call_gets_correct_results();
-run_out_of_tests();
-wrong_method();
-wrong_args_structure();
-wrong_args_subref();
-magic_for_new();
-didnt_run_all_tests();
-
 default_ok();
 
 sub default_ok {
@@ -39,6 +31,14 @@ sub default_ok {
     ok($result =~ /^not ok.*didn't run all tests/, "normal 'ok' works")
         || diag($result);
 }
+
+correct_method_call_gets_correct_results();
+run_out_of_tests();
+wrong_method();
+wrong_args_structure();
+wrong_args_subref();
+magic_for_new();
+didnt_run_all_tests();
 
 sub didnt_run_all_tests {
     { 
