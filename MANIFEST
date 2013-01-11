@@ -14,4 +14,8 @@ ARTISTIC.txt
 t/coverage.sh
 t/lib/ParentPackage.pm
 lib/Class/Mock/Method/InterfaceTester.pm
-t/class-mock-method-interfacetester.t
+t/test-classes/CMMITTests.pm
+t/lib/CMMITTestClass.pm
+t/lib/CMMITTestClass/Subclass.pm
+t/lib/CMTests/TestClass.pm
+t/test-class.t
