@@ -13,7 +13,8 @@ use Class::Mockable
 # how about some Test::Class and inheritance?
 
 use Config;
-use Test::More tests => 17;
+use Test::More tests => 26;
+use Scalar::Util qw(blessed);
 use Capture::Tiny qw(capture);
 use Class::Mock::Method::InterfaceTester;
 
@@ -51,6 +52,8 @@ didnt_run_all_tests();
 inheritance();
 invocant_class_and_object();
 invocant_class();
+invocant_object_string();
+invocant_object_subref();
 
 sub wrong_args_structure {
     CMMITTests->_reset_test_method();
@@ -148,4 +151,40 @@ sub invocant_class {
     CMMITTests::Subclass->_test_method('foo'); # called on wrong class, via inheritance
     CMMITTests->_test_method('foo');           # called on wrong class
     ok(CMMITTests::Subclass->_test_method('foo') eq 'foo', "called on right class via inheritance");
+}
+
+# re-factor these two
+sub invocant_object_string {
+    CMMITTests->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { invocant_object => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_object => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_object => 'CMMITTests',           input => ['foo'], output => 'foo' },
+            { invocant_object => 'CMMITTests::Subclass', input => ['foo'], output => 'foo' },
+            { invocant_object => 'CMMITTests::Subclass', input => ['foo'], output => 'foo' },
+        ])
+    );
+
+    CMMITTests->_test_method('foo'); # called on class, not object
+
+    ok(bless({}, 'CMMITTests')->_test_method('foo') eq 'foo', "called on object of right class");
+    bless({}, 'CMMITTests::Subclass')->_test_method('foo'); # called on object of wrong class, via inheritance
+    bless({}, 'CMMITTests')->_test_method('foo');           # called on object of wrong class
+    ok(bless({}, 'CMMITTests::Subclass')->_test_method('foo') eq 'foo', "called on object of right class via inheritance");
+}
+
+sub invocant_object_subref {
+    CMMITTests->_set_test_method(
+        Class::Mock::Method::InterfaceTester->new([
+            { invocant_object => sub { blessed($_[0]) eq 'CMMITTests' },           input => ['foo'], output => 'foo' },
+            { invocant_object => sub { blessed($_[0]) eq 'CMMITTests' },           input => ['foo'], output => 'foo' },
+            { invocant_object => sub { blessed($_[0]) eq 'CMMITTests::Subclass' }, input => ['foo'], output => 'foo' },
+            { invocant_object => sub { blessed($_[0]) eq 'CMMITTests::Subclass' }, input => ['foo'], output => 'foo' },
+        ])
+    );
+
+    ok(bless({}, 'CMMITTests')->_test_method('foo') eq 'foo', "called on object that matches sub-ref");
+    bless({}, 'CMMITTests::Subclass')->_test_method('foo'); # called on object that doesn't match, via inheritance
+    bless({}, 'CMMITTests')->_test_method('foo');           # called on object that doesn't match
+    ok(bless({}, 'CMMITTests::Subclass')->_test_method('foo') eq 'foo', "called on object that matches sub-ref, via inheritance");
 }

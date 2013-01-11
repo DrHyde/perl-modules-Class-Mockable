@@ -8,7 +8,7 @@ our $VERSION = '1.0';
 # all this pre-amble is damned near identical to C::M::G::IT. Re-factor.
 use Test::More ();
 use Data::Compare;
-use Scalar::Util;
+use Scalar::Util qw(blessed);
 use PadWalker qw(closed_over);
 use Data::Dumper;
 local $Data::Dumper::Indent = 1;
@@ -53,7 +53,20 @@ sub new {
                 __PACKAGE__->_ok()->(0, sprintf("class method called on wrong class, defined in %s - got %s expected %s.", $called_from, $invocant, $this_test->{invocant_class}));
                 return;
             }
-        } elsif($this_test->{invocant_object}) {
+        } elsif($this_test->{invocant_object}) { # must be called as object method
+            if(!blessed($invocant)) {
+                __PACKAGE__->_ok()->(0, sprintf("expected call as object method, but class method called, defined in %s.", $called_from));
+                return;
+            }
+            if(ref($this_test->{invocant_object}) eq 'CODE') { # check via subref
+                if(!$this_test->{invocant_object}->($invocant)) {
+                    __PACKAGE__->_ok()->(0, sprintf("object method called on object which doesn't match specified sub-ref, defined in %s.", $called_from));
+                    return;
+                }
+            } elsif(blessed($invocant) ne $this_test->{invocant_object}) { # object must be right class
+                __PACKAGE__->_ok()->(0, sprintf("object method called on object of wrong class, defined in %s - called on a %s, expected a %s.", $called_from, blessed($invocant), $this_test->{invocant_object}));
+                return;
+            }
         }
 
         return $this_test->{output};
@@ -128,7 +141,9 @@ outs of each method call in turn.  'input' is always an arrayref which
 will get compared to all the method's arguments (excluding the first
 one, the object or class itself) but For validating very complex inputs
 you may specify a subroutine reference for the input, which will get
-executed with the actual input as its argument.  If you want to check
+executed with the actual input as its argument.
+
+If you want to check
 that the method is being invoked on the right object or class (if you
 are paranoid about inheritance, for example) then use the optional
 'invocant_class' string to check that it's being called as a class method
