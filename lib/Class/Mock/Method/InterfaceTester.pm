@@ -16,6 +16,21 @@ local $Data::Dumper::Indent = 1;
 use Class::Mockable
     _ok => sub { Test::More::ok($_[0], @_[1..$#_]) };
 
+use constant {
+    DIDNT_RUN_ALL             => 'didn\'t run all tests in mock method defined in %s (remaining tests: %s)',
+    RUN_OUT                   => 'run out of tests on mock method defined in %s',
+
+    WRONG_ARGS                => 'wrong args to mock method defined in %s. Got %s',
+    WRONG_ARGS_W_EXPECTED     => 'wrong args to mock method defined in %s. Got %s, expected %s',
+
+    BOTH_INVOCANTS            => 'bad fixture %s, can\'t have invocant_object and invocant_class, defined in %s',
+    EXP_CLASS_GOT_OBJECT      => 'expected call as class method, but object method called, defined in %s',
+    EXP_OBJECT_GOT_CLASS      => 'expected call as object method, but class method called, defined in %s',
+    WRONG_CLASS               => 'class method called on wrong class, defined in %s - got %s expected %s',
+    WRONG_OBJECT              => 'object method called on object of wrong class, defined in %s - called on a %s, expected a %s',
+    WRONG_OBJECT_SUBREF       => 'object method called on object which doesn\'t match specified sub-ref, defined in %s',
+};
+
 sub new {
     my $class = shift;
     my $called_from = (caller(1))[3];
@@ -23,8 +38,7 @@ sub new {
 
     return bless(sub {
         if(!@tests) { # no tests left
-            __PACKAGE__->_ok()->(0, sprintf("run out of tests on mock method defined in %s", $called_from));
-            return;
+            return $class->_report_error(RUN_OUT, $called_from);
         }
 
         my $this_test = shift(@tests);
@@ -34,43 +48,41 @@ sub new {
         # check arguments
         if(ref($this_test->{input}) eq 'CODE') {
             if(!$this_test->{input}->(@params)) {
-                __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant defined in %s. Got %s.", $called_from, Dumper(\@params)));
-                return;
+                return $class->_report_error(WRONG_ARGS, $called_from, Dumper(\@params));
             }
         } elsif(!Compare($this_test->{input}, \@params)) {
-            __PACKAGE__->_ok()->(0, sprintf("wrong args to mock method defined on $invocant defined in %s. Got %s.", $called_from, Dumper(\@params)));
-            return;
+                return $class->_report_error(WRONG_ARGS_W_EXPECTED, $called_from, Dumper(\@params), Dumper($this_test->{input}));
         }
 
         # check invocant
         if($this_test->{invocant_class} && $this_test->{invocant_object}) {
-            __PACKAGE__->_ok()->(0, sprintf("bad fixture %s, can't have invocant_object and invocant_class, defined in %s", Dumper($this_test), $called_from));
+            return $class->_report_error(BOTH_INVOCANTS, Dumper($this_test), $called_from);
         } elsif($this_test->{invocant_class}) { # must be called as class method on right class
             if(ref($invocant)) {
-                __PACKAGE__->_ok()->(0, sprintf("expected call as class method, but object method called, defined in %s.", $called_from));
-                return;
+                return $class->_report_error(EXP_CLASS_GOT_OBJECT, $called_from);
             } elsif($invocant ne $this_test->{invocant_class}) {
-                __PACKAGE__->_ok()->(0, sprintf("class method called on wrong class, defined in %s - got %s expected %s.", $called_from, $invocant, $this_test->{invocant_class}));
-                return;
+                return $class->_report_error(WRONG_CLASS, $called_from, $invocant, $this_test->{invocant_class});
             }
         } elsif($this_test->{invocant_object}) { # must be called as object method
             if(!blessed($invocant)) {
-                __PACKAGE__->_ok()->(0, sprintf("expected call as object method, but class method called, defined in %s.", $called_from));
-                return;
+                return $class->_report_error(EXP_OBJECT_GOT_CLASS, $called_from);
             }
             if(ref($this_test->{invocant_object}) eq 'CODE') { # check via subref
                 if(!$this_test->{invocant_object}->($invocant)) {
-                    __PACKAGE__->_ok()->(0, sprintf("object method called on object which doesn't match specified sub-ref, defined in %s.", $called_from));
-                    return;
+                    return $class->_report_error(WRONG_OBJECT_SUBREF, $called_from);
                 }
             } elsif(blessed($invocant) ne $this_test->{invocant_object}) { # object must be right class
-                __PACKAGE__->_ok()->(0, sprintf("object method called on object of wrong class, defined in %s - called on a %s, expected a %s.", $called_from, blessed($invocant), $this_test->{invocant_object}));
-                return;
+                return $class->_report_error(WRONG_OBJECT, $called_from, blessed($invocant), $this_test->{invocant_object});
             }
         }
 
         return $this_test->{output};
     }, $class);
+}
+
+sub _report_error {
+    my($class, $error, @params) = @_;
+    $class->_ok()->(0, sprintf($error, @params));
 }
 
 # re-factor this and C::M::G::IT::DESTROY
@@ -79,13 +91,7 @@ sub DESTROY {
   my %closure = %{(closed_over($self))[0]};
 
   if(@{$closure{'@tests'}}) {
-    __PACKAGE__->_ok()->( 0,
-        sprintf (
-            "didn't run all tests in mock method defined in %s (remaining tests: %s)",
-            ${$closure{'$called_from'}},
-            Dumper( $closure{'@tests'} )
-        )
-    );
+      $self->_report_error(DIDNT_RUN_ALL,  ${$closure{'$called_from'}}, Dumper( $closure{'@tests'} ));
   }
 }
 
