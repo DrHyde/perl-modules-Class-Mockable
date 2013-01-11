@@ -130,18 +130,21 @@ Class::Mock::Generic::InterfaceTester.  That is, it will validate
 that the method is being called correctly and emit a test failure if it
 isn't, or if called correctly will return the specified value.  If the
 method is ever called with the wrong parameters - including if defined
-method calls are made in the wrong order, then that's a test failure.
+method calls are made in the wrong order - then that's a test failure.
 
 It is also a test failure to call the method fewer or more times than
-expected.
+expected.  Calling it fewer times than expected will be detected very
+late - when the subroutine goes away, so either at the end of the process
+or when it is redefined, eg with _reset_... (see Class::Mockable).
 
-C<new()> takes an arrayref or hashrefs as its argument.  Those hashes
+C<new()> takes an arrayref of hashrefs as its argument.  Those hashes
 must have keys 'input' and 'output' whose values define the ins and
 outs of each method call in turn.  'input' is always an arrayref which
 will get compared to all the method's arguments (excluding the first
-one, the object or class itself) but For validating very complex inputs
+one, the object or class itself) but for validating very complex inputs
 you may specify a subroutine reference for the input, which will get
-executed with the actual input as its argument.
+executed with the actual input as its argument, and emit a failure if
+the call returns false.
 
 If you want to check
 that the method is being invoked on the right object or class (if you
