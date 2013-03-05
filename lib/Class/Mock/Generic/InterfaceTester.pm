@@ -285,6 +285,13 @@ sub AUTOLOAD {
         );
         return;
     }
+
+    # Sometimes the method you mock returns void, arrays or hashes.
+    # Pass in a code-ref that returns them
+    if (ref $next_test->{output} eq 'CODE') {
+        return $next_test->{output}->();
+    }
+
     return $next_test->{output};
 }
 

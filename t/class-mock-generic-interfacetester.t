@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -51,9 +51,11 @@ sub didnt_run_all_tests {
 sub correct_method_call_gets_correct_results {
     my $interface = Class::Mock::Generic::InterfaceTester->new([
         { method => 'foo', input => ['foo'], output => 'foo' },
+        { method => 'foo', input => ['bar'], output => sub { qw/bar baz/ } },
     ]);
 
     ok($interface->foo('foo') eq 'foo', "correct method call gets right result back");
+    is_deeply([$interface->foo('bar')], [qw/bar baz/], "pass a code ref to return arrays and hashes");
 }
 
 sub run_out_of_tests {
