@@ -76,6 +76,10 @@ sub new {
             }
         }
 
+        if ( ref($this_test->{output}) eq 'CODE' ) {
+          return $this_test->{output}->();
+        }
+
         return $this_test->{output};
     }, $class);
 }
