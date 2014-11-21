@@ -19,3 +19,4 @@ t/lib/CMMITTestClass.pm
 t/lib/CMMITTestClass/Subclass.pm
 t/lib/CMTests/TestClass.pm
 t/test-class.t
+MANIFEST.SKIP
