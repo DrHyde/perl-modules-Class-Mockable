@@ -193,6 +193,13 @@ For example:
 It will also work for inserting a shim into a subclass to wrap around a method
 inherited from a superclass.
 
+=head1 CAVEATS
+
+If you use L<namespace::autoclean> in the same module as this it may
+"helpfully" delete mocked methods that you create. You may need to
+explicitly exclude those from namespace::autoclean's list of things to
+clean.
+
 =head1 AUTHOR
 
 Copyright 2012-13 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
