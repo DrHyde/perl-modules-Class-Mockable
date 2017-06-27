@@ -3,6 +3,7 @@ package Class::Mock::Generic::InterfaceTester;
 use strict;
 use warnings;
 
+### FIXME: shouldn't this be 1.11?
 our $VERSION = '1.0';
 
 use vars qw($AUTOLOAD);
