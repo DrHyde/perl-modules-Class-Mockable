@@ -294,7 +294,8 @@ sub new {
                 $method,
                 $caller
             )
-        }
+        },
+        tests => [],
     }, $class);
     if (@_) {
         $_add_fixtures->($self, @_);
