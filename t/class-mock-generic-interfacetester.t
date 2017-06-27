@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 13;
+use Test::More tests => 15;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -160,6 +160,27 @@ sub add_fixtures_arrayref {
         'More than one');
 }
 
-sub add_fixtures_list { }
+sub add_fixtures_list {
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new;
+    $interface_tester->add_fixtures(
+        {
+            method => 'brood',
+            input  => [{ style => 'teenager', glower => 'yes', }],
+            output => 'Excellent gloom',
+        },
+        {
+            method => 'sulk',
+            input  => ['endlessly'],
+            output => 'Woe!',
+        }
+    );
+    is(
+        $interface_tester->brood({ glower => 'yes', style => 'teenager' }),
+        'Excellent gloom',
+        'You can add a method fixture as a list'
+    );
+    is($interface_tester->sulk('endlessly'), 'Woe!',
+        'And another');
+}
 sub add_fixtures_ordered_hash { }
 sub add_fixtures_input_omitted { }
