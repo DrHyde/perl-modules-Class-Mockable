@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -138,7 +138,28 @@ sub add_fixtures_method_not_mocked {
     );
 }
 
-sub add_fixtures_arrayref { } 
+sub add_fixtures_arrayref {
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new;
+    $interface_tester->add_fixtures(
+        [
+            {
+                method => 'frolic',
+                input  => ['joyously'],
+                output => 'yay!',
+            },
+            {
+                method => 'celebrate',
+                input  => sub { 1 },
+                output => q{It's your birthday!},
+            }
+        ]
+    );
+    is($interface_tester->frolic('joyously'), 'yay!',
+        'You can add a method fixture as an arrayref');
+    is($interface_tester->celebrate, q{It's your birthday!},
+        'More than one');
+}
+
 sub add_fixtures_list { }
 sub add_fixtures_ordered_hash { }
 sub add_fixtures_input_omitted { }
