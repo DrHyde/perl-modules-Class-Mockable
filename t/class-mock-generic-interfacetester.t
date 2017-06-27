@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -216,4 +216,32 @@ sub add_fixtures_ordered_hash {
     );
 }
 
-sub add_fixtures_input_omitted { }
+sub add_fixtures_input_omitted {
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new;
+    $interface_tester->add_fixtures(
+        [
+            {
+                method => 'blow_things_up',
+                output => 'Boom!',
+            }
+        ]
+    );
+    is(
+        $interface_tester->blow_things_up(
+            q{It doesn't matter what I want to blow up}
+        ),
+        'Boom!',
+        'If you omit input, its exact value is ignored'
+    );
+    $interface_tester->add_fixtures(
+        blow_things_up_again => {
+            output => 'Boom! Boom! Boom for everyone!',
+        }
+    );
+    like(
+        $interface_tester->blow_things_up_again(
+            qw(tinky-winky laa-laa dipsy po )),
+        qr/Boom/,
+        'This works for shorthand fixtures as well'
+    );
+}
