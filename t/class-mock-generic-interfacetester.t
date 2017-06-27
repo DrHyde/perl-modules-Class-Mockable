@@ -4,7 +4,7 @@ use warnings;
 package CMGITtests;
 
 use Config;
-use Test::More tests => 15;
+use Test::More tests => 18;
 use Capture::Tiny qw(capture);
 use Class::Mock::Generic::InterfaceTester;
 
@@ -182,5 +182,38 @@ sub add_fixtures_list {
     is($interface_tester->sulk('endlessly'), 'Woe!',
         'And another');
 }
-sub add_fixtures_ordered_hash { }
+
+sub add_fixtures_ordered_hash {
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new;
+    $interface_tester->add_fixtures(
+        rock => {
+            input  => ['horns'],
+            output => 'metal AF',
+        },
+        paper => {
+            input  => [{ over => 'cracks' }],
+            output => 'Totally covered',
+        },
+        scissors => {
+            input  => ['Attractive woman', 'Other attractive woman'],
+            output => 'Not going to happen',
+        }
+    );
+    is($interface_tester->rock('horns'), 'metal AF',
+        'One call to our mocked interface');
+    is(
+        $interface_tester->paper({ over => 'cracks' }),
+        'Totally covered',
+        'And another with slightly fancy arguments'
+    );
+    is(
+        $interface_tester->scissors(
+            'Attractive woman',
+            'Other attractive woman'
+        ),
+        'Not going to happen',
+        'Arrayref arguments work as well'
+    );
+}
+
 sub add_fixtures_input_omitted { }
