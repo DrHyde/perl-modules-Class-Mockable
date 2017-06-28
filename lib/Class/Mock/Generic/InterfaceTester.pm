@@ -3,8 +3,7 @@ package Class::Mock::Generic::InterfaceTester;
 use strict;
 use warnings;
 
-### FIXME: shouldn't this be 1.11?
-our $VERSION = '1.0';
+our $VERSION = '1.2';
 
 use vars qw($AUTOLOAD);
 
@@ -423,7 +422,9 @@ sub DESTROY {
  
 =head1 AUTHOR
 
-Copyright 2012 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2012, 2017 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+
+Some contributions from Sam Kington
 
 This software is free-as-in-speech software, and may be used, distributed,
 and modified under the terms of either the GNU General Public Licence
