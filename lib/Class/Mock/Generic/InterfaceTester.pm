@@ -287,14 +287,6 @@ sub new {
     my $caller = (caller(1))[3];
     my $self = bless({
         called_from => $caller,
-        _origin_message => sub {
-            my $method = shift;
-            return sprintf(
-                "method '%s' called on mock object defined in %s",
-                $method,
-                $caller
-            )
-        },
         tests => [],
     }, $class);
     if (@_) {
@@ -303,6 +295,16 @@ sub new {
         $self->{_no_fixtures_in_constructor} = 1;
     }
     return $self;
+}
+
+sub _origin_message {
+    my $self = shift;
+    my $method = shift;
+    return sprintf(
+        "method '%s' called on mock object defined in %s",
+        $method,
+        $self->{called_from}
+    )
 }
 
 # Declaring this as a coderef rather than a method so we can decide
@@ -370,7 +372,7 @@ sub AUTOLOAD {
             sprintf (
                 "wrong method (expected %s) %s",
                 $next_test->{method},
-                $self->{_origin_message}->($method)
+                $self->_origin_message($method)
             )
         );
         return;
@@ -397,7 +399,7 @@ sub AUTOLOAD {
         __PACKAGE__->_ok()->( 0,
             sprintf (
                 "wrong args to %s (expected %s, got %s)",
-                $self->{_origin_message}->($method),
+                $self->_origin_message($method),
                 Dumper($next_test->{input}),
                 Dumper(\@args)
             )
