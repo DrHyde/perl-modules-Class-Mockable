@@ -284,7 +284,8 @@ sub new {
         return $class->AUTOLOAD(@_);
     }
 
-    my $caller = sprintf("%s at line %d of %s", (caller(1))[3, 2, 1]);
+    my($sub, $line, $file) = ((caller(1))[3], (caller(0))[2, 1]);
+    my $caller = sprintf("%s at line %d of %s", $sub, $line, $file);
     my $self = bless({
         called_from => $caller,
         tests => [],
