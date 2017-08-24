@@ -3,7 +3,7 @@ package Class::Mock::Generic::InterfaceTester;
 use strict;
 use warnings;
 
-our $VERSION = '1.2000';
+our $VERSION = '1.2001';
 
 use vars qw($AUTOLOAD);
 
