@@ -12,4 +12,4 @@ build_script:
   - perl Makefile.PL
 
 test_script:
-  - make test
+  - gmake test
