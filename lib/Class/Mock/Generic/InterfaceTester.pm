@@ -339,9 +339,11 @@ sub new {
     return $self;
 }
 
-# Declaring this as a coderef rather than a method so we can decide
+# $_add_fixtures is a coderef rather than a method so we can decide
 # whether it exists or not based on how the constructor was called,
 # for maximum backwards-compatibility.
+#
+# $_get_from_file is a coderef so _get_from_file can always be mocked
 
 my $_get_from_file = sub {
     my(undef, $filename) = @_;
