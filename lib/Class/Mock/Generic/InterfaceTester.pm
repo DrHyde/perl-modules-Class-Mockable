@@ -77,6 +77,23 @@ or, more simply:
     );
     ok(My::Module->something_that_updates_storage_for_non_payment);
 
+You can also create mocks by loading them from a file:
+
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new(
+        \"filename.dd"
+    );
+
+or:
+
+    my $interface_tester = Class::Mock::Generic::InterfaceTester->new;
+    $interface_tester->add_fixtures(
+        \"filename.dd"
+    );
+
+Yes, that's a reference to a scalar. The scalar is assumed to be a filename
+which will be read, and whose contents should be valid arguments to create
+fixtures.
+
 =head1 METHODS
 
 =head2 new
@@ -326,13 +343,31 @@ sub new {
 # whether it exists or not based on how the constructor was called,
 # for maximum backwards-compatibility.
 
+my $_get_from_file = sub {
+    my(undef, $filename) = @_;
+    local $/ = undef;
+    open(my $fh, '<', $filename) || die("Can't open $filename: $!\n");
+    my $content = <$fh>;
+    close($fh);
+    my $tests = do {
+        no strict;
+        eval($content);
+    };
+    die("File $filename isn't valud perl\n") if($@);
+    die("File $filename didn't evaluate to an arrayref\n")
+        unless(ref($tests) eq 'ARRAY');
+    return @{$tests};
+};
+
 $_add_fixtures = sub {
     my $self = shift;
 
     $self->{_fixtures_have_been_set} = 1;
 
     # We might have been passed an arrayref or a list.
-    my @args = (ref($_[0]) eq 'ARRAY' && @_ == 1) ? @{$_[0]} : @_;
+    my @args = (ref($_[0]) eq 'ARRAY' && @_ == 1)  ? @{$_[0]} :
+               (ref($_[0]) eq 'SCALAR' && @_ == 1) ? $_get_from_file->($self, ${$_[0]}) :
+                                                     @_;
 
     # Our fixtures might be raw hashrefs, or method name => hashref pairs.
     # You can't mix and match.
@@ -455,7 +490,7 @@ sub DESTROY {
  
 =head1 AUTHOR
 
-Copyright 2012, 2017 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2012 - 2020 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 Some contributions from Sam Kington
 
