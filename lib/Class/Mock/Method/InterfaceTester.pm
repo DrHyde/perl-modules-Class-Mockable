@@ -34,7 +34,25 @@ use constant {
 sub new {
     my $class = shift;
     my $called_from = (caller(1))[3];
-    my @tests = @{shift()};
+
+    my $tests = shift;
+    my @tests;
+    if(ref($tests) eq 'ARRAY') { @tests = @{$tests}; }
+     else {
+         my $filename = ${$tests};
+         local $/ = undef;
+         open(my $fh, '<', $filename) || die("Can't open $filename: $!\n");
+         my $content = <$fh>;
+         close($fh);
+         my $tests = do {
+             no strict;
+             eval($content);
+         };
+         die("File $filename isn't valid perl\n") if($@);
+         die("File $filename didn't evaluate to an arrayref\n")
+             unless(ref($tests) eq 'ARRAY');
+         @tests = @{$tests};
+    }
 
     return bless(sub {
         if(!@tests) { # no tests left
@@ -155,6 +173,14 @@ or when it is redefined, eg with _reset_... (see Class::Mockable).
 C<new()> takes an arrayref of hashrefs as its argument.  Those hashes
 must have keys 'input' and 'output' whose values define the ins and
 outs of each method call in turn.
+
+Alternatively, C<new()> can load that data from a file:
+
+    Class::Mock::Method::InterfaceTester->new(\"filename.dd");
+
+Yes, that's a reference to a scalar. The scalar is assumed to be a filename
+which will be read, and whose contents should be valid arguments to create
+fixtures.
 
 =over
 
