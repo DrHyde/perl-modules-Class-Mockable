@@ -13,6 +13,8 @@ use PadWalker qw(closed_over);
 use Data::Dumper;
 local $Data::Dumper::Indent = 1;
 
+use Class::Mock::Common ();
+
 use Class::Mockable
     _ok => sub { Test::More::ok($_[0], @_[1..$#_]) };
 
@@ -38,20 +40,7 @@ sub new {
     my $tests = shift;
     my @tests;
     if(ref($tests) eq 'ARRAY') { @tests = @{$tests}; }
-     else {
-         my $filename = ${$tests};
-         local $/ = undef;
-         open(my $fh, '<', $filename) || die("Can't open $filename: $!\n");
-         my $content = <$fh>;
-         close($fh);
-         my $tests = do {
-             no strict;
-             eval($content);
-         };
-         die("File $filename isn't valid perl\n") if($@);
-         die("File $filename didn't evaluate to an arrayref\n")
-             unless(ref($tests) eq 'ARRAY');
-         @tests = @{$tests};
+     else { @tests = Class::Mock::Common::_get_tests_from_file(${$tests});
     }
 
     return bless(sub {

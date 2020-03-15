@@ -14,7 +14,7 @@ WriteMakefile(
     'Data::Compare'     => 0,
     'Data::Dumper'      => 0,
     'Scalar::Util'      => 0,
-    'Test::More'        => 0,
+    'Test::More'        => 0.88, # for done_testing()
     'Capture::Tiny'     => 0.21,
     'PadWalker'         => 1.0, # earlier versions don't have closed_over()
     'Test::Class'       => 0,

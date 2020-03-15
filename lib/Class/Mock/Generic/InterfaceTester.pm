@@ -16,6 +16,8 @@ local $Data::Dumper::Indent = 1;
 use Class::Mockable
     _ok => sub { Test::More::ok($_[0], @_[1..$#_]) };
 
+use Class::Mock::Common ();
+
 =head1 NAME
 
 Class::Mock::Generic::InterfaceTester
@@ -343,23 +345,6 @@ sub new {
 # whether it exists or not based on how the constructor was called,
 # for maximum backwards-compatibility.
 #
-# $_get_from_file is a coderef so _get_from_file can always be mocked
-
-my $_get_from_file = sub {
-    my(undef, $filename) = @_;
-    local $/ = undef;
-    open(my $fh, '<', $filename) || die("Can't open $filename: $!\n");
-    my $content = <$fh>;
-    close($fh);
-    my $tests = do {
-        no strict;
-        eval($content);
-    };
-    die("File $filename isn't valud perl\n") if($@);
-    die("File $filename didn't evaluate to an arrayref\n")
-        unless(ref($tests) eq 'ARRAY');
-    return @{$tests};
-};
 
 $_add_fixtures = sub {
     my $self = shift;
@@ -368,7 +353,7 @@ $_add_fixtures = sub {
 
     # We might have been passed an arrayref or a list.
     my @args = (ref($_[0]) eq 'ARRAY' && @_ == 1)  ? @{$_[0]} :
-               (ref($_[0]) eq 'SCALAR' && @_ == 1) ? $_get_from_file->($self, ${$_[0]}) :
+               (ref($_[0]) eq 'SCALAR' && @_ == 1) ? Class::Mock::Common::_get_tests_from_file(${$_[0]}) :
                                                      @_;
 
     # Our fixtures might be raw hashrefs, or method name => hashref pairs.
