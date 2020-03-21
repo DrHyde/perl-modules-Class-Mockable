@@ -163,14 +163,6 @@ C<new()> takes an arrayref of hashrefs as its argument.  Those hashes
 must have keys 'input' and 'output' whose values define the ins and
 outs of each method call in turn.
 
-Alternatively, C<new()> can load that data from a file:
-
-    Class::Mock::Method::InterfaceTester->new(\"filename.dd");
-
-Yes, that's a reference to a scalar. The scalar is assumed to be a filename
-which will be read, and whose contents should be valid arguments to create
-fixtures.
-
 =over
 
 =item input
@@ -198,6 +190,46 @@ invocant_object' string to check that it's being called on an object of
 the right class (again, not a subclass), or 'invocant_object' subref to
 check that it's being called on an object that, when passed to the sub-ref,
 returns true.
+
+Alternatively, C<new> can read fixture data from a file or you can use it
+to pass args through to other code and record its responses to a file.
+
+=over
+
+=item reading from a file
+
+Pass a reference to a scalar as the first argument. Any subsequent arguments
+will be ignored:
+
+    Class::Mock::Method::InterfaceTester->new(\"filename.dd");
+
+Yes, that's a reference to a scalar. The scalar is assumed to be a filename
+which will be read, and whose contents should be valid arguments to create
+fixtures.
+
+=item recording and writing to a file
+
+Set the environment varilable PERL_CMMIT_RECORD to a true value and Pass a
+reference to a scalar as the first argument, following by the name of class
+whose interactions you want to record, and optionally either a list of method
+names or a regular expression matching some method names:
+
+    Class::Mock::Method::InterfaceTester->new(
+        \"filename.dd",
+        'I::Want::To::Mock::This',
+        qw(but only these methods) # or qr/^(but|only|these|methods)$/
+    );
+
+In the absence of a list of methods (or a regex) then all methods will be
+recorded, including those inherited from superclasses, except those whose names
+begin with an underscore.
+
+=back
+
+The observant amongst you will have noticed that because when reading from
+a file all arguments after the first are ignored, then you can choose to
+record or to playback by just setting the environment variable and making
+no other changes. This is deliberate.
 
 =head1 SEE ALSO
 

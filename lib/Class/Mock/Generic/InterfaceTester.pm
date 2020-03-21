@@ -203,6 +203,33 @@ C<set_name> are treated as normal mocked method calls.
 When the mock object goes out of scope, this is called as usual.  It
 will emit a test failure if not all the fixtures were used.
 
+=head1 RECORDING AND PLAYBACK
+
+As noted above you can read fixtures from a file by passing a reference to
+a scalar filename as the first argument to C<new> or C<add_fixtures>.
+
+YOu can also record the interactions of your tests with a class by setting the
+environment variable PERL_CMGIT_RECORD to a true value and passing some extra
+args to C<new>. As well as the reference to a filename, also pass the name of
+the class whose input and output you wish to record, and optionally either a
+list of methods or a regex that matches method names thus:
+
+    Class::Mock::Generic::InterfaceTester->new(
+        \"filename.dd",
+        'I::Want::To::Mock::This',
+        qw(but only these methods) # or qr/^(but|only|these|methods)$/
+    );
+
+and the mock object will pass args through to the underlying class and record
+what happens. If no list of methods or regex is present then all methods will
+be recorded, including those inherited from superclasses, except those whose
+names begin with an underscore.
+
+The observant amongst you will have noticed that because when reading from
+a file all arguments after the first are ignored, then you can choose to
+record or to playback by just setting the environment variable and making
+no other changes. This is deliberate.
+
 =head1 PHILOSOPHY
 
 When you test a piece of code, you want to test it in isolation, because
