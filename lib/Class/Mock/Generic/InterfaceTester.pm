@@ -3,15 +3,14 @@ package Class::Mock::Generic::InterfaceTester;
 use strict;
 use warnings;
 
-our $VERSION = '1.3000';
+our $VERSION = '1.3001';
 
 use vars qw($AUTOLOAD);
 
 use Test::More ();
 use Data::Compare;
 use Scalar::Util;
-use Data::Dumper;
-local $Data::Dumper::Indent = 1;
+use Data::Dumper::Concise;
 
 use Class::Mockable
     _ok => sub { Test::More::ok($_[0], @_[1..$#_]) };

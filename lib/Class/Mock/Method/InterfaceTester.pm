@@ -3,15 +3,14 @@ package Class::Mock::Method::InterfaceTester;
 use strict;
 use warnings;
 
-our $VERSION = '1.3000';
+our $VERSION = '1.3001';
 
 # all this pre-amble is damned near identical to C::M::G::IT. Re-factor.
 use Test::More ();
 use Data::Compare;
 use Scalar::Util qw(blessed);
 use PadWalker qw(closed_over);
-use Data::Dumper;
-local $Data::Dumper::Indent = 1;
+use Data::Dumper::Concise;
 
 use Class::Mock::Common ();
 
