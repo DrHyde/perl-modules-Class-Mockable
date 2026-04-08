@@ -19,11 +19,7 @@ use Class::Mock::Common ();
 
 =head1 NAME
 
-Class::Mock::Generic::InterfaceTester
-
-=head1 DESCRIPTION
-
-A mock object for testing that you call other code correctly
+Class::Mock::Generic::InterfaceTester - A mock object for testing that you call other code correctly
 
 =head1 SYNOPSIS
 
@@ -507,7 +503,7 @@ sub DESTROY {
  
 =head1 AUTHOR
 
-Copyright 2012 - 2020 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2012 - 2026 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 Some contributions from Sam Kington
 

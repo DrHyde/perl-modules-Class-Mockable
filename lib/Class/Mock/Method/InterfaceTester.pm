@@ -114,11 +114,7 @@ sub DESTROY {
 
 =head1 NAME
 
-Class::Mock::Method::InterfaceTester
-
-=head1 DESCRIPTION
-
-A helper for Class::Mockable's method mocking
+Class::Mock::Method::InterfaceTester - A helper for Class::Mockable's method mocking
 
 =head1 SYNOPSIS
 
@@ -248,7 +244,7 @@ L<Class::Mock::Generic::InterfaceTester>
 
 =head1 AUTHOR
 
-Copyright 2013 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2013 - 2026 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 This software is free-as-in-speech software, and may be used, distributed,
 and modified under the terms of either the GNU General Public Licence

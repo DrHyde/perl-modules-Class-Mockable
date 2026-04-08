@@ -73,11 +73,7 @@ sub _add_method_mocking {
 
 =head1 NAME
 
-Class::Mockable
-
-=head1 DESCRIPTION
-
-A handy mix-in for making stuff mockable.
+Class::Mockable - A handy mix-in for making stuff mockable.
 
 Use this so that when testing your code you can easily mock how your
 code talks to other bits of code, thus making it possible to test
@@ -202,7 +198,7 @@ clean.
 
 =head1 AUTHOR
 
-Copyright 2012-13 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
+Copyright 2012 - 2026 UK2 Ltd and David Cantrell E<lt>david@cantrell.org.ukE<gt>
 
 With some bits from James Ronan
 
