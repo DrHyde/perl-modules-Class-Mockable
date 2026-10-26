@@ -2,8 +2,10 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME         => 'Class::Mockable',
-    META_MERGE => {
+    META_ADD => {
         license => 'open_source',
+},
+META_MERGE => {
         resources => {
 	    repository => 'https://github.com/DrHyde/perl-modules-Class-Mockable',
 	    bugtracker => 'https://github.com/DrHyde/perl-modules-Class-Mockable/issues',
